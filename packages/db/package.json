@@ -1,0 +1,21 @@
+{
+  "name": "db",
+  "module": "index.js",
+  "type": "module",
+  "exports": {
+    "./client": "./index.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "prisma": "^6.16.2"
+  },
+  "prisma": {
+    "seed": "./prisma/seed.ts"
+  }
+}
