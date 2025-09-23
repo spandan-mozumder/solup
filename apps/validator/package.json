@@ -2,6 +2,10 @@
   "name": "validator",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun --watch index.ts",
+    "start": "bun index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "common": "*"
@@ -10,8 +14,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@solana/kit": "^2.1.0",
-    "@solana/web3.js": "^1.98.0",
+    "@solana/kit": "^3.0.3",
+    "@solana/web3.js": "^1.98.4",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   }

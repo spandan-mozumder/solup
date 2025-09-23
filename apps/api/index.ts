@@ -88,3 +88,5 @@ app.post("/api/v1/payout/:validatorId", async (req, res) => {
 })
 
 app.listen(8080);
+
+console.log("API server starting on port 8080...");

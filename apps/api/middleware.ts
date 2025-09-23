@@ -1,20 +1,35 @@
-import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { JWT_PUBLIC_KEY } from "./config";
+import type { RequestHandler } from "express";
+import { prismaClient } from "db/client";
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
+export const authMiddleware: RequestHandler = async (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        res.status(401).json({ error: 'Unauthorized - No authorization header' });
+        return;
     }
 
-    const decoded = jwt.verify(token, JWT_PUBLIC_KEY);
-    console.log(decoded);
-    if (!decoded || !decoded.sub) {
-        return res.status(401).json({ error: 'Unauthorized' });
+    // Extract user ID from "Bearer {userId}" format
+    const userId = authHeader.replace('Bearer ', '');
+    if (!userId) {
+        res.status(401).json({ error: 'Unauthorized - Invalid token format' });
+        return;
     }
 
-    req.userId = decoded.sub as string;
-    
-    next()
+    try {
+        // Verify the user exists in the database
+        const user = await prismaClient.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!user) {
+            res.status(401).json({ error: 'Unauthorized - User not found' });
+            return;
+        }
+
+        req.userId = user.id;
+        next();
+    } catch (error) {
+        console.error('Auth middleware error:', error);
+        res.status(401).json({ error: 'Unauthorized - Database error' });
+    }
 }

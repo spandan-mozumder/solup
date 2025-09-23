@@ -9,9 +9,15 @@ const CALLBACKS: {[callbackId: string]: (data: SignupOutgoingMessage) => void} =
 let validatorId: string | null = null;
 
 async function main() {
+    console.log("Starting validator...");
     const keypair = Keypair.fromSecretKey(
         Uint8Array.from(JSON.parse(process.env.PRIVATE_KEY!))
     );
+    
+    console.log("Waiting for hub to be ready...");
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds for hub to start
+    
+    console.log("Connecting to hub...");
     const ws = new WebSocket("ws://localhost:8081");
 
     ws.onmessage = async (event) => {

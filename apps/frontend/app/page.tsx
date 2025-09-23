@@ -1,71 +1,121 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Activity, Bell, Clock, Server, ArrowRight, Check, Moon, Sun } from 'lucide-react';
+import { Activity, Bell, Clock, Server, ArrowRight, Check, Moon, Sun, Globe, Monitor } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
+          <div className="flex items-center space-x-2">
+            <Globe className="h-6 w-6 text-primary" />
+            <span className="text-lg font-semibold">Website Monitor</span>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {/* Theme Toggle Button */}
+            {mounted && (
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" onClick={() => router.push('/auth/signin')}>
+                Sign In
+              </Button>
+              <Button onClick={() => router.push('/auth/signup')}>
+                Sign Up
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-16 md:py-24">
+      <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
-              Monitor Your Services with Confidence
-            </h1>
-            <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">
-              Get instant alerts when your services go down. Monitor uptime, performance, and ensure your business never misses a beat.
-            </p>
-            <div className="mt-8 flex space-x-4">
-              <button onClick={() => router.push('/dashboard')} className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition flex items-center">
-                Start Monitoring
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
-              <button className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition dark:text-white">
-                View Demo
-              </button>
+            <div className="space-y-6">
+              <Badge variant="secondary" className="w-fit">
+                <Activity className="h-3 w-3 mr-1" />
+                Real-time Monitoring
+              </Badge>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                Monitor Your Websites with Confidence
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Get instant alerts when your websites go down. Monitor uptime, performance, and ensure your business never misses a beat.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" onClick={() => router.push('/dashboard')}>
+                  Start Monitoring
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="lg">
+                  View Demo
+                </Button>
+              </div>
             </div>
           </div>
           <div className="relative">
-            <img
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
-              alt="Dashboard"
-              className="rounded-lg shadow-2xl"
-            />
+            <Card className="border-0 shadow-2xl">
+              <CardContent className="p-0">
+                <img
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
+                  alt="Dashboard Preview"
+                  className="rounded-lg w-full h-auto"
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="bg-gray-50 dark:bg-gray-800/50 py-20">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-16">
-            Everything you need for reliable monitoring
-          </h2>
-          <div className="grid md:grid-cols-3 gap-12">
+      <section id="features" className="py-20 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Everything you need for reliable monitoring
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Professional website monitoring tools to keep your business online
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<Bell className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />}
+              icon={<Bell className="h-8 w-8 text-primary" />}
               title="Instant Alerts"
               description="Get notified immediately when your services experience downtime through multiple channels."
             />
             <FeatureCard
-              icon={<Clock className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />}
+              icon={<Clock className="h-8 w-8 text-primary" />}
               title="24/7 Monitoring"
               description="Round-the-clock monitoring from multiple locations worldwide."
             />
             <FeatureCard
-              icon={<Server className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />}
+              icon={<Server className="h-8 w-8 text-primary" />}
               title="Detailed Reports"
               description="Comprehensive reports and analytics to track your service performance."
             />
@@ -75,11 +125,16 @@ function App() {
 
       {/* Pricing */}
       <section id="pricing" className="py-20">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-16">
-            Simple, transparent pricing
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Choose the plan that fits your monitoring needs
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <PricingCard
               title="Starter"
               price="29"
@@ -121,45 +176,45 @@ function App() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-6">
+      <footer className="border-t bg-muted/50">
+        <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2">
-                <Activity className="h-6 w-6 text-indigo-400" />
-                <span className="text-xl font-bold">UptimeGuard</span>
+                <Globe className="h-6 w-6 text-primary" />
+                <span className="text-xl font-bold">Website Monitor</span>
               </div>
-              <p className="mt-4 text-gray-400">
-                Keeping your services online, always.
+              <p className="mt-4 text-muted-foreground">
+                Keeping your websites online, always.
               </p>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Features</a></li>
-                <li><a href="#" className="hover:text-white">Pricing</a></li>
-                <li><a href="#" className="hover:text-white">API</a></li>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">About</a></li>
-                <li><a href="#" className="hover:text-white">Blog</a></li>
-                <li><a href="#" className="hover:text-white">Careers</a></li>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Privacy</a></li>
-                <li><a href="#" className="hover:text-white">Terms</a></li>
-                <li><a href="#" className="hover:text-white">Security</a></li>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; 2025 UptimeGuard. All rights reserved.</p>
+          <div className="mt-12 pt-8 border-t text-center text-muted-foreground">
+            <p>&copy; 2025 Website Monitor. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -167,46 +222,68 @@ function App() {
   );
 }
 
-function FeatureCard({ icon, title, description }) {
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-      <div className="mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-gray-600 dark:text-gray-300">{description}</p>
-    </div>
+    <Card className="transition-all hover:shadow-md">
+      <CardHeader>
+        <div className="mb-2">{icon}</div>
+        <CardTitle className="text-xl">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="text-base">{description}</CardDescription>
+      </CardContent>
+    </Card>
   );
 }
 
-function PricingCard({ title, price, features, featured = false }) {
+interface PricingCardProps {
+  title: string;
+  price: string;
+  features: string[];
+  featured?: boolean;
+}
+
+function PricingCard({ title, price, features, featured = false }: PricingCardProps) {
   return (
-    <div className={`p-8 rounded-lg ${
-      featured
-        ? 'bg-indigo-600 text-white ring-4 ring-indigo-300 dark:ring-indigo-500'
-        : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+    <Card className={`relative transition-all hover:shadow-lg ${
+      featured ? 'ring-2 ring-primary shadow-lg scale-105' : ''
     }`}>
-      <h3 className="text-xl font-semibold mb-4">{title}</h3>
-      <div className="mb-6">
-        <span className="text-4xl font-bold">${price}</span>
-        <span className="text-sm">/month</span>
-      </div>
-      <ul className="space-y-3 mb-8">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-center space-x-2">
-            <Check className="h-5 w-5" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-      <button
-        className={`w-full py-3 rounded-lg transition ${
-          featured
-            ? 'bg-white text-indigo-600 hover:bg-gray-100 dark:hover:bg-gray-200'
-            : 'bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600'
-        }`}
-      >
-        Get Started
-      </button>
-    </div>
+      {featured && (
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+          <Badge className="bg-primary text-primary-foreground">
+            Most Popular
+          </Badge>
+        </div>
+      )}
+      <CardHeader>
+        <CardTitle className="text-xl">{title}</CardTitle>
+        <div className="space-y-1">
+          <div className="flex items-baseline">
+            <span className="text-4xl font-bold">${price}</span>
+            <span className="text-muted-foreground ml-1">/month</span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <ul className="space-y-3">
+          {features.map((feature: string, index: number) => (
+            <li key={index} className="flex items-center space-x-2">
+              <Check className="h-4 w-4 text-primary" />
+              <span className="text-sm">{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <Button className="w-full" variant={featured ? 'default' : 'outline'}>
+          Get Started
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 

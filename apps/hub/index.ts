@@ -156,3 +156,5 @@ setInterval(async () => {
         });
     }
 }, 60 * 1000);
+
+console.log("Hub server starting on port 8081...");

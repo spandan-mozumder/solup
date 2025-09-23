@@ -1,72 +1,112 @@
 "use client";
-import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, Globe, Plus, Moon, Sun } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWebsites } from '@/hooks/useWebsites';
 import axios from 'axios';
 import { API_BACKEND_URL } from '@/config';
-import { useAuth } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { ChevronDown, ChevronUp, Globe, Plus, TrendingUp, TrendingDown, Clock, Activity } from 'lucide-react';
 
 type UptimeStatus = "good" | "bad" | "unknown";
 
-function StatusCircle({ status }: { status: UptimeStatus }) {
+function StatusIndicator({ status }: { status: UptimeStatus }) {
+  const statusConfig = {
+    good: { color: "bg-green-500", label: "Online", variant: "default" as const },
+    bad: { color: "bg-red-500", label: "Offline", variant: "destructive" as const },
+    unknown: { color: "bg-gray-500", label: "Unknown", variant: "secondary" as const }
+  };
+
+  const config = statusConfig[status];
+  
   return (
-    <div className={`w-3 h-3 rounded-full ${status === 'good' ? 'bg-green-500' : status === 'bad' ? 'bg-red-500' : 'bg-gray-500'}`} />
+    <div className="flex items-center space-x-2">
+      <div className={`w-2 h-2 rounded-full ${config.color}`} />
+      <Badge variant={config.variant} className="text-xs">
+        {config.label}
+      </Badge>
+    </div>
   );
 }
 
 function UptimeTicks({ ticks }: { ticks: UptimeStatus[] }) {
   return (
-    <div className="flex gap-1 mt-2">
+    <div className="flex gap-1">
       {ticks.map((tick, index) => (
         <div
           key={index}
-          className={`w-8 h-2 rounded ${
-            tick === 'good' ? 'bg-green-500' : tick === 'bad' ? 'bg-red-500' : 'bg-gray-500'
+          className={`w-3 h-8 rounded-sm ${
+            tick === 'good' ? 'bg-green-500' : tick === 'bad' ? 'bg-red-500' : 'bg-muted'
           }`}
+          title={tick === 'good' ? 'Online' : tick === 'bad' ? 'Offline' : 'Unknown'}
         />
       ))}
     </div>
   );
 }
 
-function CreateWebsiteModal({ isOpen, onClose }: { isOpen: boolean; onClose: (url: string | null) => void }) {
+function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; onClose: (url: string | null) => void }) {
   const [url, setUrl] = useState('');
-  if (!isOpen) return null;
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = () => {
+    if (url.trim()) {
+      onClose(url.trim());
+      setUrl('');
+      setOpen(false);
+    }
+  };
+
+  const handleCancel = () => {
+    onClose(null);
+    setUrl('');
+    setOpen(false);
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4 dark:text-white">Add New Website</h2>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Website</DialogTitle>
+          <DialogDescription>
+            Enter the URL of the website you want to monitor.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="url" className="text-right">
               URL
-            </label>
-            <input
+            </Label>
+            <Input
+              id="url"
               type="url"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
               placeholder="https://example.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
+              className="col-span-3"
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             />
           </div>
-          <div className="flex justify-end space-x-3 mt-6">
-            <button
-              type="button"
-              onClick={() => onClose(null)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              onClick={() => onClose(url)}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-            >
-              Add Website
-            </button>
-          </div>
-      </div>
-    </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={!url.trim()}>
+            Add Website
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -83,49 +123,140 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div
-        className="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center space-x-4">
-          <StatusCircle status={website.status} />
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">{website.url}</h3>
+    <Card className="transition-all hover:shadow-md">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Globe className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">{website.url}</CardTitle>
+              <CardDescription className="flex items-center space-x-2 mt-1">
+                <Clock className="h-3 w-3" />
+                <span>Last checked: {website.lastChecked}</span>
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <StatusIndicator status={website.status} />
+            <div className="text-right">
+              <div className="flex items-center space-x-1">
+                {website.uptimePercentage >= 95 ? (
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                )}
+                <span className="font-semibold">{website.uptimePercentage.toFixed(1)}%</span>
+              </div>
+              <p className="text-xs text-muted-foreground">uptime</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600 dark:text-gray-300">
-            {website.uptimePercentage.toFixed(1)}% uptime
-          </span>
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-          )}
-        </div>
-      </div>
+      </CardHeader>
       
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
-          <div className="mt-3">
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Last 30 minutes status:</p>
-            <UptimeTicks ticks={website.uptimeTicks} />
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Last checked: {website.lastChecked}
-          </p>
-        </div>
+        <>
+          <Separator />
+          <CardContent className="pt-4">
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                  <Label className="text-sm font-medium">Last 30 minutes activity</Label>
+                </div>
+                <UptimeTicks ticks={website.uptimeTicks} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <StatusIndicator status={website.status} />
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Uptime</p>
+                  <p className="font-medium">{website.uptimePercentage.toFixed(2)}%</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </>
       )}
+    </Card>
+  );
+}
+
+function DashboardStats({ websites }: { websites: ProcessedWebsite[] }) {
+  const stats = useMemo(() => {
+    const total = websites.length;
+    const online = websites.filter(w => w.status === 'good').length;
+    const offline = websites.filter(w => w.status === 'bad').length;
+    const avgUptime = total > 0 ? websites.reduce((acc, w) => acc + w.uptimePercentage, 0) / total : 0;
+    
+    return { total, online, offline, avgUptime };
+  }, [websites]);
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Websites</CardTitle>
+          <Globe className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.total}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Online</CardTitle>
+          <TrendingUp className="h-4 w-4 text-green-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-green-600">{stats.online}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Offline</CardTitle>
+          <TrendingDown className="h-4 w-4 text-red-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-red-600">{stats.offline}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Avg Uptime</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.avgUptime.toFixed(1)}%</div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const {websites, refreshWebsites} = useWebsites();
-  const { getToken } = useAuth();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Redirect unauthenticated users via effect to keep hooks order stable
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth/signin");
+    }
+  }, [status, router]);
 
   const processedWebsites = useMemo(() => {
     return websites.map(website => {
@@ -181,73 +312,128 @@ function App() {
     });
   }, [websites]);
 
-  // Toggle dark mode
-  React.useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-2">
-            <Globe className="w-8 h-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Uptime Monitor</h1>
+  // Loading / redirect placeholders while keeping hooks order consistent
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Loading your dashboard...</p>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              )}
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Website</span>
-            </button>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          {processedWebsites.map((website) => (
-            <WebsiteCard key={website.id} website={website} />
-          ))}
         </div>
       </div>
+    );
+  }
+  
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">Redirecting to sign in...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-      <CreateWebsiteModal
-        isOpen={isModalOpen}
-        onClose={async (url) => {
-            if (url === null) {
-                setIsModalOpen(false);
-                return;
-            }
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 px-4">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Website Monitor</h1>
+              <p className="text-muted-foreground">
+                Monitor your websites and track their uptime performance.
+              </p>
+            </div>
+            <CreateWebsiteModal
+              onClose={async (url) => {
+                if (url === null) return;
+                if (!session?.user?.id) return;
 
-            const token = await getToken();
-            setIsModalOpen(false)
-            axios.post(`${API_BACKEND_URL}/api/v1/website`, {
-                url,
-            }, {
-                headers: {
-                    Authorization: token,
-                },
-            })
-            .then(() => {
-                refreshWebsites();
-            })
-        }}
-      />
+                try {
+                  await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
+                    url,
+                  }, {
+                    headers: {
+                      Authorization: `Bearer ${session.user.id}`,
+                    },
+                  });
+                  refreshWebsites();
+                } catch (error) {
+                  console.error('Failed to add website:', error);
+                }
+              }}
+            >
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Website
+              </Button>
+            </CreateWebsiteModal>
+          </div>
+
+          {/* Stats Overview */}
+          <DashboardStats websites={processedWebsites} />
+
+          {/* Websites List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Your Websites</h2>
+              <Badge variant="secondary">{processedWebsites.length} total</Badge>
+            </div>
+            
+            {processedWebsites.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Globe className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No websites yet</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Get started by adding your first website to monitor.
+                  </p>
+                  <CreateWebsiteModal
+                    onClose={async (url) => {
+                      if (url === null) return;
+                      if (!session?.user?.id) return;
+
+                      try {
+                        await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
+                          url,
+                        }, {
+                          headers: {
+                            Authorization: `Bearer ${session.user.id}`,
+                          },
+                        });
+                        refreshWebsites();
+                      } catch (error) {
+                        console.error('Failed to add website:', error);
+                      }
+                    }}
+                  >
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Your First Website
+                    </Button>
+                  </CreateWebsiteModal>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {processedWebsites.map((website) => (
+                  <WebsiteCard key={website.id} website={website} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
