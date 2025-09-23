@@ -1,5 +1,1 @@
-import { PrismaClient } from "./generated/prisma/index.js";
-
-export const prismaClient = new PrismaClient();
-
-export type { PrismaClient } from "./generated/prisma/index.d.ts";
+console.log("Hello via Bun!");

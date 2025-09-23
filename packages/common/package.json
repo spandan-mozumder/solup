@@ -2,7 +2,6 @@
   "name": "common",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "exports": {
     "./types": "./index.ts"
   },
@@ -10,6 +9,6 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.0.0"
   }
 }
