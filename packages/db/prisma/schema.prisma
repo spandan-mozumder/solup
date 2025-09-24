@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   websites      Website[]
+  validators    Validator[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -73,11 +74,13 @@ model Website {
 
 model Validator {
   id        String      @id     @default(uuid())
-  publicKey String
+  publicKey String      @unique
   location  String
   ip        String
   pendingPayouts  Int         @default(0)
   ticks     WebsiteTick[]
+  userId    String?    @unique
+  user      User?      @relation(fields: [userId], references: [id])
 }
 
 model WebsiteTick {

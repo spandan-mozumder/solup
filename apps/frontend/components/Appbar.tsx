@@ -4,12 +4,14 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Moon, Sun, Monitor, LogOut, User, Settings } from "lucide-react";
+import { Moon, Sun, Monitor, LogOut, User, Settings, Server } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useValidatorStats } from "../hooks/useValidatorStats";
 
 export function Appbar() {
     const { data: session, status } = useSession();
     const { theme, setTheme } = useTheme();
+    const { stats } = useValidatorStats(5000);
 
     if (status === "loading") {
         return (
@@ -31,10 +33,13 @@ export function Appbar() {
                 <div className="flex items-center space-x-2">
                     <Monitor className="h-6 w-6 text-primary" />
                     <span className="text-lg font-semibold">SolUp Monitor</span>
+                    <span className="flex items-center text-xs rounded bg-secondary px-2 py-1 text-secondary-foreground">
+                        <Server className="h-3 w-3 mr-1" /> {stats ? stats.onlineValidators : '...'} online
+                    </span>
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                    {/* Theme Toggle */}
+
                     <Button 
                         variant="ghost" 
                         size="icon"

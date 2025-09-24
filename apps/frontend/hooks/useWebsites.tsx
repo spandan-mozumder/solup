@@ -20,12 +20,12 @@ export function useWebsites() {
     const [websites, setWebsites] = useState<Website[]>([]);
 
     async function refreshWebsites() {    
-        if (!session?.user?.id) return;
+        if (!(session?.user as { id: string })?.id) return;
 
         try {
             const response = await axios.get(`${API_BACKEND_URL}/api/v1/websites`, {
                 headers: {
-                    Authorization: `Bearer ${session.user.id}`, // Using user ID as authorization
+                    Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
                 },
             });
 
@@ -36,18 +36,18 @@ export function useWebsites() {
     }
 
     useEffect(() => {
-        if (session?.user?.id) {
+        if ((session?.user as { id: string })?.id) {
             refreshWebsites();
         }
 
         const interval = setInterval(() => {
-            if (session?.user?.id) {
+            if ((session?.user as { id: string })?.id) {
                 refreshWebsites();
             }
-        }, 1000 * 60 * 1);
+        }, 5000);
 
         return () => clearInterval(interval);
-    }, [session?.user?.id]);
+    }, [session]);
 
     return { websites, refreshWebsites };
 

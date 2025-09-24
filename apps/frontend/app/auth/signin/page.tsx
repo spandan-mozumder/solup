@@ -8,23 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Globe, Mail } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
+      console.log("Attempting sign in with:", { email });
       const result = await signIn("credentials", {
         email,
         password,
@@ -32,42 +31,51 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError("Invalid credentials");
+        console.error("Sign in error:", result.error);
+        toast.error("Invalid credentials. Please check your email and password.");
       } else {
-        // Check if sign in was successful
         const session = await getSession();
         if (session) {
+          console.log("Sign in successful:", session);
+          toast.success("Welcome back! Redirecting to dashboard...");
           router.push("/dashboard");
         }
       }
     } catch (error) {
-      setError("An error occurred during sign in");
+      console.error("Sign in error:", error);
+      toast.error("An error occurred during sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
+    console.log("Attempting Google sign in");
+    toast.loading("Redirecting to Google...");
     signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-4">
-              <Globe className="h-8 w-8 text-primary" />
+        <Card className="border-0 shadow-xl">
+          <CardHeader className="space-y-6 pb-8">
+            <div className="flex items-center justify-center">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Globe className="h-8 w-8 text-primary" />
+              </div>
             </div>
-            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
-            <CardDescription className="text-center">
-              Sign in to your account to continue monitoring your websites
-            </CardDescription>
+            <div className="space-y-2 text-center">
+              <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
+              <CardDescription className="text-base">
+                Sign in to your account to continue monitoring your websites
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCredentialsSignIn} className="space-y-4">
+          <CardContent className="space-y-6">
+            <form onSubmit={handleCredentialsSignIn} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -76,10 +84,11 @@ export default function SignInPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
+                  className="h-12"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -88,18 +97,13 @@ export default function SignInPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
+                  className="h-12"
                 />
               </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Mail className="mr-2 h-4 w-4" />
+              <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {!isLoading && <Mail className="mr-2 h-5 w-5" />}
                 Sign in with Email
               </Button>
             </form>
@@ -108,8 +112,8 @@ export default function SignInPage() {
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+              <div className="relative flex justify-center text-sm uppercase">
+                <span className="bg-background px-4 text-muted-foreground font-medium">
                   Or continue with
                 </span>
               </div>
@@ -117,11 +121,11 @@ export default function SignInPage() {
 
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full h-12 text-base"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+              <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -142,10 +146,10 @@ export default function SignInPage() {
               Continue with Google
             </Button>
           </CardContent>
-          <CardFooter>
-            <div className="text-center text-sm text-muted-foreground w-full">
+          <CardFooter className="pt-6">
+            <div className="text-center text-muted-foreground w-full">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="underline underline-offset-4 hover:text-primary">
+              <Link href="/auth/signup" className="font-medium text-primary hover:underline underline-offset-4">
                 Sign up
               </Link>
             </div>

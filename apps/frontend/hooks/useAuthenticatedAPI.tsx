@@ -16,14 +16,14 @@ export function useAuthenticatedAPI() {
             throw new Error('No active session');
         }
 
-        // Get the session token - this will be the NextAuth JWT token
+
         const token = await fetch('/api/auth/session').then(res => res.json());
         
         const config: AxiosRequestConfig = {
             method,
             url: `${API_BACKEND_URL}${endpoint}`,
             headers: {
-                'Authorization': `Bearer ${session.user.id}`,
+                'Authorization': `Bearer ${(session?.user as { id: string })?.id}`,
                 'Content-Type': 'application/json',
             },
         };

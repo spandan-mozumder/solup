@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Frontend (Next.js App Router)
 
-## Getting Started
+User-facing web application for Solup providing authentication, dashboard, validator interaction, and theming.
 
-First, run the development server:
+## Features
+- Next.js App Router (v15)
+- Authentication via NextAuth (credentials + Google)
+- Prisma-backed user/session persistence
+- Shadcn UI + Tailwind theming (dark / light / system)
+- Sonner toasts for feedback
+- Solana wallet integration (validator runtime)
+- Modular hooks: `useWebsites`, `useValidatorStats`, `useAuthenticatedAPI`
 
+## Dev Quick Start
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
 bun dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables (examples)
+```
+DATABASE_URL=postgres://...
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=changeme
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+NEXT_PUBLIC_API_BASE=http://localhost:3001
+NEXT_PUBLIC_SOLANA_RPC=https://api.mainnet-beta.solana.com
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure Highlights
+- `app/` route segments, API routes for auth & validator ops
+- `components/` UI and providers (theme, auth, wallet)
+- `hooks/` data + side-effect abstractions
+- `lib/auth.ts` NextAuth configuration
+- `types/next-auth.d.ts` module augmentation for session token `id`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
+```bash
+bun dev          # development
+bun run build    # production build
+bun start        # start production server
+```
 
-## Learn More
+## Testing Ideas (Not Implemented Yet)
+- Component tests via Playwright / React Testing Library
+- Contract tests for API endpoints
 
-To learn more about Next.js, take a look at the following resources:
+## Future Enhancements
+- Suspense-based data loading
+- Improved wallet abstraction & lazy hydration
+- Analytics + audit logging
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Troubleshooting
+- Build failing on wallet context: ensure wallet provider only loads client-side.
+- Auth types missing: confirm `types/next-auth.d.ts` is picked up (tsconfig `typeRoots`).

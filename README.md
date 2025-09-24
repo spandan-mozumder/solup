@@ -82,3 +82,29 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
 - [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
 - [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+
+## Browser-Based Validator
+
+Validator activity now occurs only while a user has the `/validator` page open in the `frontend` app. There is no separate headless validator process.
+
+### How It Works
+1. User signs in.
+2. Visits `/validator` and connects a Solana wallet.
+3. Registers (POST `/api/validator`).
+4. A browser runtime (`BrowserValidatorRuntime`) opens a WebSocket to the hub and performs validation tasks.
+5. Closing the tab stops validation instantly (no background/headless continuation).
+
+### Data Model
+`Validator` fields: `publicKey`, `userId` (nullable, claimed on registration), `pendingPayouts`, `ip`, `location`.
+
+### Hub Interaction
+The hub (`apps/hub`) tracks currently connected validators (in‑memory) and dispatches validation requests. Ticks recorded in `WebsiteTick` contribute to `pendingPayouts`.
+
+### Environment Variables
+Optional: `NEXT_PUBLIC_SOLANA_RPC` to override RPC endpoint.
+
+### Future Enhancements (Optional)
+- Live tick/latency charts.
+- Payout claiming UI.
+- Support for multiple wallets per user (would require schema change removing unique on `userId`).
+- WebSocket push for validator stats instead of polling `/stats`.

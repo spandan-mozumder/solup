@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ChevronDown, ChevronUp, Globe, Plus, TrendingUp, TrendingDown, Clock, Activity } from 'lucide-react';
+import { ChevronDown, ChevronUp, Globe, Plus, TrendingUp, TrendingDown, Clock, Activity, Loader2 } from 'lucide-react';
+import { toast } from "sonner";
 
 type UptimeStatus = "good" | "bad" | "unknown";
 
@@ -54,12 +55,23 @@ function UptimeTicks({ ticks }: { ticks: UptimeStatus[] }) {
 function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; onClose: (url: string | null) => void }) {
   const [url, setUrl] = useState('');
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (url.trim()) {
-      onClose(url.trim());
-      setUrl('');
-      setOpen(false);
+      setIsLoading(true);
+      try {
+        console.log("Adding new website:", url.trim());
+        await onClose(url.trim());
+        setUrl('');
+        setOpen(false);
+        toast.success("Website added successfully!");
+      } catch (error) {
+        console.error("Failed to add website:", error);
+        toast.error("Failed to add website. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -98,10 +110,11 @@ function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; 
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!url.trim()}>
+          <Button onClick={handleSubmit} disabled={!url.trim() || isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Add Website
           </Button>
         </DialogFooter>
@@ -123,36 +136,39 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className="transition-all hover:shadow-md">
-      <CardHeader className="pb-3">
+    <Card className="transition-all hover:shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Globe className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Globe className="h-5 w-5 text-primary" />
+            </div>
             <div>
-              <CardTitle className="text-base">{website.url}</CardTitle>
+              <CardTitle className="text-lg font-semibold">{website.url}</CardTitle>
               <CardDescription className="flex items-center space-x-2 mt-1">
                 <Clock className="h-3 w-3" />
                 <span>Last checked: {website.lastChecked}</span>
               </CardDescription>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             <StatusIndicator status={website.status} />
             <div className="text-right">
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 {website.uptimePercentage >= 95 ? (
-                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <TrendingUp className="h-5 w-5 text-green-500" />
                 ) : (
-                  <TrendingDown className="h-4 w-4 text-red-500" />
+                  <TrendingDown className="h-5 w-5 text-red-500" />
                 )}
-                <span className="font-semibold">{website.uptimePercentage.toFixed(1)}%</span>
+                <span className="text-xl font-bold">{website.uptimePercentage.toFixed(1)}%</span>
               </div>
-              <p className="text-xs text-muted-foreground">uptime</p>
+              <p className="text-sm text-muted-foreground">uptime</p>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              className="ml-2"
             >
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
@@ -251,7 +267,7 @@ function App() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Redirect unauthenticated users via effect to keep hooks order stable
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.replace("/auth/signin");
@@ -260,18 +276,18 @@ function App() {
 
   const processedWebsites = useMemo(() => {
     return websites.map(website => {
-      // Sort ticks by creation time
+
       const sortedTicks = [...website.ticks].sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
-      // Get the most recent 30 minutes of ticks
+
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       const recentTicks = sortedTicks.filter(tick => 
         new Date(tick.createdAt) > thirtyMinutesAgo
       );
 
-      // Aggregate ticks into 3-minute windows (10 windows total)
+
       const windows: UptimeStatus[] = [];
 
       for (let i = 0; i < 10; i++) {
@@ -283,20 +299,20 @@ function App() {
           return tickTime >= windowStart && tickTime < windowEnd;
         });
 
-        // Window is considered up if majority of ticks are up
+
         const upTicks = windowTicks.filter(tick => tick.status === 'Good').length;
         windows[9 - i] = windowTicks.length === 0 ? "unknown" : (upTicks / windowTicks.length) >= 0.5 ? "good" : "bad";
       }
 
-      // Calculate overall status and uptime percentage
+
       const totalTicks = sortedTicks.length;
       const upTicks = sortedTicks.filter(tick => tick.status === 'Good').length;
       const uptimePercentage = totalTicks === 0 ? 100 : (upTicks / totalTicks) * 100;
 
-      // Get the most recent status
+
       const currentStatus = windows[windows.length - 1];
 
-      // Format the last checked time
+
       const lastChecked = sortedTicks[0]
         ? new Date(sortedTicks[0].createdAt).toLocaleTimeString()
         : 'Never';
@@ -312,7 +328,7 @@ function App() {
     });
   }, [websites]);
 
-  // Loading / redirect placeholders while keeping hooks order consistent
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-background">
@@ -346,30 +362,34 @@ function App() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-8">
-          {/* Header */}
+
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Website Monitor</h1>
-              <p className="text-muted-foreground">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
+              <p className="text-xl text-muted-foreground">
                 Monitor your websites and track their uptime performance.
               </p>
             </div>
             <CreateWebsiteModal
               onClose={async (url) => {
                 if (url === null) return;
-                if (!session?.user?.id) return;
+                if (!(session?.user as { id: string })?.id) return;
 
                 try {
+                  console.log("Adding website via API:", url);
                   await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
                     url,
                   }, {
                     headers: {
-                      Authorization: `Bearer ${session.user.id}`,
+                      Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
                     },
                   });
+                  console.log("Website added successfully, refreshing list");
                   refreshWebsites();
                 } catch (error) {
                   console.error('Failed to add website:', error);
+                  toast.error("Failed to add website. Please check the URL and try again.");
+                  throw error;
                 }
               }}
             >
@@ -380,10 +400,10 @@ function App() {
             </CreateWebsiteModal>
           </div>
 
-          {/* Stats Overview */}
+
           <DashboardStats websites={processedWebsites} />
 
-          {/* Websites List */}
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Your Websites</h2>
@@ -401,14 +421,14 @@ function App() {
                   <CreateWebsiteModal
                     onClose={async (url) => {
                       if (url === null) return;
-                      if (!session?.user?.id) return;
+                      if (!(session?.user as { id: string })?.id) return;
 
                       try {
                         await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
                           url,
                         }, {
                           headers: {
-                            Authorization: `Bearer ${session.user.id}`,
+                            Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
                           },
                         });
                         refreshWebsites();

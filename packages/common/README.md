@@ -1,15 +1,16 @@
-# common
+# Common Package
 
-To install dependencies:
+Lightweight shared utilities and constants consumed by multiple apps (frontend, api, hub).
 
-```bash
-bun install
+## Contents
+- Re-exported helpers from `index.ts`
+- Cross-cutting pure functions (add here instead of duplicating)
+
+## Usage
+```ts
+import { something } from "common";
 ```
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.2. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## Future
+- Add shared error types
+- Shared validation schemas
