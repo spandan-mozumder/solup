@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface ValidatorStats {
   onlineValidators: number;
@@ -15,14 +15,18 @@ export function useValidatorStats(intervalMs: number = 5000) {
 
     async function fetchStats() {
       try {
-        const res = await fetch(process.env.NEXT_PUBLIC_HUB_BASE_URL ? `${process.env.NEXT_PUBLIC_HUB_BASE_URL}/stats` : 'http://localhost:8081/stats');
+        const res = await fetch(
+          process.env.NEXT_PUBLIC_HUB_BASE_URL
+            ? `${process.env.NEXT_PUBLIC_HUB_BASE_URL}/stats`
+            : "http://localhost:8081/stats",
+        );
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const json = await res.json();
         if (active) {
-            setStats(json);
-            setError(null);
+          setStats(json);
+          setError(null);
         }
-      } catch (e:any) {
+      } catch (e: any) {
         if (active) setError(e.message);
       } finally {
         if (active) timer = setTimeout(fetchStats, intervalMs);
@@ -30,7 +34,10 @@ export function useValidatorStats(intervalMs: number = 5000) {
     }
 
     fetchStats();
-    return () => { active = false; if (timer) clearTimeout(timer); };
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+    };
   }, [intervalMs]);
 
   return { stats, error };

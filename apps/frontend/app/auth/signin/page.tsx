@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Globe, Mail } from "lucide-react";
 import Link from "next/link";
@@ -32,7 +39,9 @@ export default function SignInPage() {
 
       if (result?.error) {
         console.error("Sign in error:", result.error);
-        toast.error("Invalid credentials. Please check your email and password.");
+        toast.error(
+          "Invalid credentials. Please check your email and password.",
+        );
       } else {
         const session = await getSession();
         if (session) {
@@ -75,7 +84,9 @@ export default function SignInPage() {
           <CardContent className="space-y-6">
             <form onSubmit={handleCredentialsSignIn} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -88,7 +99,9 @@ export default function SignInPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -101,7 +114,11 @@ export default function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full h-12 text-base"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 {!isLoading && <Mail className="mr-2 h-5 w-5" />}
                 Sign in with Email
@@ -149,7 +166,10 @@ export default function SignInPage() {
           <CardFooter className="pt-6">
             <div className="text-center text-muted-foreground w-full">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="font-medium text-primary hover:underline underline-offset-4">
+              <Link
+                href="/auth/signup"
+                className="font-medium text-primary hover:underline underline-offset-4"
+              >
                 Sign up
               </Link>
             </div>

@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Globe, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -53,7 +60,7 @@ export default function SignUpPage() {
       if (response.ok) {
         console.log("Registration successful, attempting auto sign-in");
         toast.success("Account created successfully! Signing you in...");
-        
+
         const result = await signIn("credentials", {
           email,
           password,
@@ -62,7 +69,9 @@ export default function SignUpPage() {
 
         if (result?.error) {
           console.error("Auto sign-in failed:", result.error);
-          toast.error("Registration successful but auto sign-in failed. Please sign in manually.");
+          toast.error(
+            "Registration successful but auto sign-in failed. Please sign in manually.",
+          );
           router.push("/auth/signin");
         } else {
           toast.success("Welcome! Redirecting to dashboard...");
@@ -98,16 +107,21 @@ export default function SignUpPage() {
               </div>
             </div>
             <div className="space-y-2 text-center">
-              <CardTitle className="text-3xl font-bold">Create account</CardTitle>
+              <CardTitle className="text-3xl font-bold">
+                Create account
+              </CardTitle>
               <CardDescription className="text-base">
-                Enter your details below to create your account and start monitoring websites
+                Enter your details below to create your account and start
+                monitoring websites
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSignUp} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Full Name
+                </Label>
                 <Input
                   id="name"
                   type="text"
@@ -120,7 +134,9 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -133,7 +149,9 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -149,7 +167,12 @@ export default function SignUpPage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
+                  Confirm Password
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -162,7 +185,11 @@ export default function SignUpPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full h-12 text-base"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 {!isLoading && <UserPlus className="mr-2 h-5 w-5" />}
                 Create Account
@@ -210,7 +237,10 @@ export default function SignUpPage() {
           <CardFooter className="pt-6">
             <div className="text-center text-muted-foreground w-full">
               Already have an account?{" "}
-              <Link href="/auth/signin" className="font-medium text-primary hover:underline underline-offset-4">
+              <Link
+                href="/auth/signin"
+                className="font-medium text-primary hover:underline underline-offset-4"
+              >
                 Sign in
               </Link>
             </div>

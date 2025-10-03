@@ -1,31 +1,67 @@
 "use client";
-import React, { useState, useMemo, useEffect } from 'react';
-import { useWebsites } from '@/hooks/useWebsites';
-import axios from 'axios';
-import { API_BACKEND_URL } from '@/config';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { ChevronDown, ChevronUp, Globe, Plus, TrendingUp, TrendingDown, Clock, Activity, Loader2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from "react";
+import { useWebsites } from "@/hooks/useWebsites";
+import axios from "axios";
+import { API_BACKEND_URL } from "@/config";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  Activity,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type UptimeStatus = "good" | "bad" | "unknown";
 
 function StatusIndicator({ status }: { status: UptimeStatus }) {
   const statusConfig = {
-    good: { color: "bg-green-500", label: "Online", variant: "default" as const },
-    bad: { color: "bg-red-500", label: "Offline", variant: "destructive" as const },
-    unknown: { color: "bg-gray-500", label: "Unknown", variant: "secondary" as const }
+    good: {
+      color: "bg-green-500",
+      label: "Online",
+      variant: "default" as const,
+    },
+    bad: {
+      color: "bg-red-500",
+      label: "Offline",
+      variant: "destructive" as const,
+    },
+    unknown: {
+      color: "bg-gray-500",
+      label: "Unknown",
+      variant: "secondary" as const,
+    },
   };
 
   const config = statusConfig[status];
-  
+
   return (
     <div className="flex items-center space-x-2">
       <div className={`w-2 h-2 rounded-full ${config.color}`} />
@@ -43,17 +79,29 @@ function UptimeTicks({ ticks }: { ticks: UptimeStatus[] }) {
         <div
           key={index}
           className={`w-3 h-8 rounded-sm ${
-            tick === 'good' ? 'bg-green-500' : tick === 'bad' ? 'bg-red-500' : 'bg-muted'
+            tick === "good"
+              ? "bg-green-500"
+              : tick === "bad"
+                ? "bg-red-500"
+                : "bg-muted"
           }`}
-          title={tick === 'good' ? 'Online' : tick === 'bad' ? 'Offline' : 'Unknown'}
+          title={
+            tick === "good" ? "Online" : tick === "bad" ? "Offline" : "Unknown"
+          }
         />
       ))}
     </div>
   );
 }
 
-function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; onClose: (url: string | null) => void }) {
-  const [url, setUrl] = useState('');
+function CreateWebsiteModal({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: (url: string | null) => void;
+}) {
+  const [url, setUrl] = useState("");
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +111,7 @@ function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; 
       try {
         console.log("Adding new website:", url.trim());
         await onClose(url.trim());
-        setUrl('');
+        setUrl("");
         setOpen(false);
         toast.success("Website added successfully!");
       } catch (error) {
@@ -77,15 +125,13 @@ function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; 
 
   const handleCancel = () => {
     onClose(null);
-    setUrl('');
+    setUrl("");
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Website</DialogTitle>
@@ -105,7 +151,7 @@ function CreateWebsiteModal({ children, onClose }: { children: React.ReactNode; 
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="col-span-3"
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
           </div>
         </div>
@@ -144,7 +190,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
               <Globe className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold">{website.url}</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {website.url}
+              </CardTitle>
               <CardDescription className="flex items-center space-x-2 mt-1">
                 <Clock className="h-3 w-3" />
                 <span>Last checked: {website.lastChecked}</span>
@@ -160,7 +208,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
                 ) : (
                   <TrendingDown className="h-5 w-5 text-red-500" />
                 )}
-                <span className="text-xl font-bold">{website.uptimePercentage.toFixed(1)}%</span>
+                <span className="text-xl font-bold">
+                  {website.uptimePercentage.toFixed(1)}%
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">uptime</p>
             </div>
@@ -179,7 +229,7 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
           </div>
         </div>
       </CardHeader>
-      
+
       {isExpanded && (
         <>
           <Separator />
@@ -188,7 +238,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
               <div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Activity className="h-4 w-4 text-muted-foreground" />
-                  <Label className="text-sm font-medium">Last 30 minutes activity</Label>
+                  <Label className="text-sm font-medium">
+                    Last 30 minutes activity
+                  </Label>
                 </div>
                 <UptimeTicks ticks={website.uptimeTicks} />
               </div>
@@ -199,7 +251,9 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Uptime</p>
-                  <p className="font-medium">{website.uptimePercentage.toFixed(2)}%</p>
+                  <p className="font-medium">
+                    {website.uptimePercentage.toFixed(2)}%
+                  </p>
                 </div>
               </div>
             </div>
@@ -213,10 +267,13 @@ function WebsiteCard({ website }: { website: ProcessedWebsite }) {
 function DashboardStats({ websites }: { websites: ProcessedWebsite[] }) {
   const stats = useMemo(() => {
     const total = websites.length;
-    const online = websites.filter(w => w.status === 'good').length;
-    const offline = websites.filter(w => w.status === 'bad').length;
-    const avgUptime = total > 0 ? websites.reduce((acc, w) => acc + w.uptimePercentage, 0) / total : 0;
-    
+    const online = websites.filter((w) => w.status === "good").length;
+    const offline = websites.filter((w) => w.status === "bad").length;
+    const avgUptime =
+      total > 0
+        ? websites.reduce((acc, w) => acc + w.uptimePercentage, 0) / total
+        : 0;
+
     return { total, online, offline, avgUptime };
   }, [websites]);
 
@@ -237,7 +294,9 @@ function DashboardStats({ websites }: { websites: ProcessedWebsite[] }) {
           <TrendingUp className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">{stats.online}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {stats.online}
+          </div>
         </CardContent>
       </Card>
       <Card>
@@ -255,7 +314,9 @@ function DashboardStats({ websites }: { websites: ProcessedWebsite[] }) {
           <Activity className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.avgUptime.toFixed(1)}%</div>
+          <div className="text-2xl font-bold">
+            {stats.avgUptime.toFixed(1)}%
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -263,10 +324,9 @@ function DashboardStats({ websites }: { websites: ProcessedWebsite[] }) {
 }
 
 function App() {
-  const {websites, refreshWebsites} = useWebsites();
+  const { websites, refreshWebsites } = useWebsites();
   const { data: session, status } = useSession();
   const router = useRouter();
-
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -275,47 +335,51 @@ function App() {
   }, [status, router]);
 
   const processedWebsites = useMemo(() => {
-    return websites.map(website => {
-
-      const sortedTicks = [...website.ticks].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return websites.map((website) => {
+      const sortedTicks = [...website.ticks].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-
 
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-      const recentTicks = sortedTicks.filter(tick => 
-        new Date(tick.createdAt) > thirtyMinutesAgo
+      const recentTicks = sortedTicks.filter(
+        (tick) => new Date(tick.createdAt) > thirtyMinutesAgo,
       );
-
 
       const windows: UptimeStatus[] = [];
 
       for (let i = 0; i < 10; i++) {
         const windowStart = new Date(Date.now() - (i + 1) * 3 * 60 * 1000);
         const windowEnd = new Date(Date.now() - i * 3 * 60 * 1000);
-        
-        const windowTicks = recentTicks.filter(tick => {
+
+        const windowTicks = recentTicks.filter((tick) => {
           const tickTime = new Date(tick.createdAt);
           return tickTime >= windowStart && tickTime < windowEnd;
         });
 
-
-        const upTicks = windowTicks.filter(tick => tick.status === 'Good').length;
-        windows[9 - i] = windowTicks.length === 0 ? "unknown" : (upTicks / windowTicks.length) >= 0.5 ? "good" : "bad";
+        const upTicks = windowTicks.filter(
+          (tick) => tick.status === "Good",
+        ).length;
+        windows[9 - i] =
+          windowTicks.length === 0
+            ? "unknown"
+            : upTicks / windowTicks.length >= 0.5
+              ? "good"
+              : "bad";
       }
 
-
       const totalTicks = sortedTicks.length;
-      const upTicks = sortedTicks.filter(tick => tick.status === 'Good').length;
-      const uptimePercentage = totalTicks === 0 ? 100 : (upTicks / totalTicks) * 100;
-
+      const upTicks = sortedTicks.filter(
+        (tick) => tick.status === "Good",
+      ).length;
+      const uptimePercentage =
+        totalTicks === 0 ? 100 : (upTicks / totalTicks) * 100;
 
       const currentStatus = windows[windows.length - 1];
 
-
       const lastChecked = sortedTicks[0]
         ? new Date(sortedTicks[0].createdAt).toLocaleTimeString()
-        : 'Never';
+        : "Never";
 
       return {
         id: website.id,
@@ -327,7 +391,6 @@ function App() {
       };
     });
   }, [websites]);
-
 
   if (status === "loading") {
     return (
@@ -343,7 +406,7 @@ function App() {
       </div>
     );
   }
-  
+
   if (status === "unauthenticated") {
     return (
       <div className="min-h-screen bg-background">
@@ -362,7 +425,6 @@ function App() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-8">
-
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
@@ -377,18 +439,24 @@ function App() {
 
                 try {
                   console.log("Adding website via API:", url);
-                  await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
-                    url,
-                  }, {
-                    headers: {
-                      Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
+                  await axios.post(
+                    `${API_BACKEND_URL}/api/v1/website`,
+                    {
+                      url,
                     },
-                  });
+                    {
+                      headers: {
+                        Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
+                      },
+                    },
+                  );
                   console.log("Website added successfully, refreshing list");
                   refreshWebsites();
                 } catch (error) {
-                  console.error('Failed to add website:', error);
-                  toast.error("Failed to add website. Please check the URL and try again.");
+                  console.error("Failed to add website:", error);
+                  toast.error(
+                    "Failed to add website. Please check the URL and try again.",
+                  );
                   throw error;
                 }
               }}
@@ -400,21 +468,23 @@ function App() {
             </CreateWebsiteModal>
           </div>
 
-
           <DashboardStats websites={processedWebsites} />
-
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Your Websites</h2>
-              <Badge variant="secondary">{processedWebsites.length} total</Badge>
+              <Badge variant="secondary">
+                {processedWebsites.length} total
+              </Badge>
             </div>
-            
+
             {processedWebsites.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Globe className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No websites yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No websites yet
+                  </h3>
                   <p className="text-muted-foreground text-center mb-4">
                     Get started by adding your first website to monitor.
                   </p>
@@ -424,16 +494,20 @@ function App() {
                       if (!(session?.user as { id: string })?.id) return;
 
                       try {
-                        await axios.post(`${API_BACKEND_URL}/api/v1/website`, {
-                          url,
-                        }, {
-                          headers: {
-                            Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
+                        await axios.post(
+                          `${API_BACKEND_URL}/api/v1/website`,
+                          {
+                            url,
                           },
-                        });
+                          {
+                            headers: {
+                              Authorization: `Bearer ${(session?.user as { id: string })?.id}`,
+                            },
+                          },
+                        );
                         refreshWebsites();
                       } catch (error) {
-                        console.error('Failed to add website:', error);
+                        console.error("Failed to add website:", error);
                       }
                     }}
                   >

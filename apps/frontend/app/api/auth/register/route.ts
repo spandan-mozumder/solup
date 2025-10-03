@@ -9,10 +9,9 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
 
     const existingUser = await prismaClient.user.findUnique({
       where: { email },
@@ -21,13 +20,11 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-
     const hashedPassword = await bcrypt.hash(password, 12);
-
 
     const user = await prismaClient.user.create({
       data: {
@@ -37,18 +34,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-
     const { password: userPassword, ...userWithoutPassword } = user;
 
     return NextResponse.json(
       { message: "User created successfully", user: userWithoutPassword },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

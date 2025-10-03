@@ -1,5 +1,6 @@
-
-export const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY || `-----BEGIN PUBLIC KEY-----
+export const JWT_PUBLIC_KEY =
+  process.env.JWT_PUBLIC_KEY ||
+  `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxYRjjCo+ZhdDrsVduRaj
 o4U9XNYbUxG4LBgtrHUpvMrRda6yXXfuecC0zwdF4O16ZNp9LMyy2bllXG8HOWyw
 ac/r/9Zt98A9jMUEKq/AhRvaRaavr9jMFceJNTebFMOnzPRZGIhMWWOGPsrwqWLa

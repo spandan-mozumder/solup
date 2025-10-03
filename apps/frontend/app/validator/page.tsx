@@ -4,13 +4,25 @@ import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Wallet, CheckCircle, AlertCircle, Activity } from "lucide-react";
+import {
+  Loader2,
+  Wallet,
+  CheckCircle,
+  AlertCircle,
+  Activity,
+} from "lucide-react";
 import { BrowserValidatorRuntime } from "@/components/BrowserValidatorRuntime";
 import { toast } from "sonner";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function ValidatorPage() {
   const { status } = useSession();
@@ -20,10 +32,10 @@ export default function ValidatorPage() {
   const [validatorId, setValidatorId] = useState<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       console.log("Fetching validator status");
       try {
-        const res = await fetch('/api/validator');
+        const res = await fetch("/api/validator");
         if (res.ok) {
           const json = await res.json();
           if (json && json.publicKey) {
@@ -33,36 +45,38 @@ export default function ValidatorPage() {
           }
         }
       } catch (error) {
-                console.error("Error:", error);
+        console.error("Error:", error);
       }
     }
   }, [status]);
 
-  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
 
   const register = async () => {
     if (!publicKey) return;
     setLoading(true);
-    
+
     try {
       console.log("Registering validator with key:", publicKey.toBase58());
-      const res = await fetch('/api/validator', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/validator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ publicKey: publicKey.toBase58() }),
       });
-      
+
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'Failed to register');
+        throw new Error(err.error || "Failed to register");
       }
-      
+
       const json = await res.json();
       console.log("Validator registered successfully:", json);
       setRegistered(true);
       if (json?.id) setValidatorId(json.id);
       toast.success("Validator registered successfully!");
-        } catch (e: any) {
+    } catch (e: any) {
       console.error("Validator registration failed:", e);
       toast.error(e.message || "Failed to register validator");
     } finally {
@@ -70,7 +84,7 @@ export default function ValidatorPage() {
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -80,15 +94,17 @@ export default function ValidatorPage() {
       </div>
     );
   }
-  
-  if (status === 'unauthenticated') {
+
+  if (status === "unauthenticated") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="h-12 w-12 mx-auto text-orange-500 mb-4" />
             <CardTitle>Authentication Required</CardTitle>
-            <CardDescription>Please sign in to access the validator page.</CardDescription>
+            <CardDescription>
+              Please sign in to access the validator page.
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -100,9 +116,12 @@ export default function ValidatorPage() {
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">Become a Validator</h1>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Become a Validator
+            </h1>
             <p className="text-xl text-muted-foreground">
-              Connect your Solana wallet to register as a validator and start monitoring the network.
+              Connect your Solana wallet to register as a validator and start
+              monitoring the network.
             </p>
           </div>
 
@@ -113,10 +132,11 @@ export default function ValidatorPage() {
               </div>
               <CardTitle className="text-2xl">Wallet Connection</CardTitle>
               <CardDescription>
-                Connect your Solana wallet to get started. Your public key will be securely stored.
+                Connect your Solana wallet to get started. Your public key will
+                be securely stored.
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
               <div className="flex justify-center">
                 <WalletMultiButton className="!bg-primary !hover:bg-primary/90 !h-12 !px-8 !text-base !rounded-lg" />
@@ -128,15 +148,17 @@ export default function ValidatorPage() {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Wallet Connected
                   </Badge>
-                  
+
                   {!registered ? (
-                    <Button 
-                      disabled={loading} 
+                    <Button
+                      disabled={loading}
                       onClick={register}
                       className="w-full h-12 text-base"
                     >
-                      {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                      {loading ? 'Registering...' : 'Register as Validator'}
+                      {loading && (
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      )}
+                      {loading ? "Registering..." : "Register as Validator"}
                     </Button>
                   ) : (
                     <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
@@ -187,5 +209,3 @@ export default function ValidatorPage() {
     </div>
   );
 }
-
-

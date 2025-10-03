@@ -1,10 +1,24 @@
-"use client"
-import React from 'react';
-import { Activity, Bell, Clock, Server, ArrowRight, Check, Globe } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+"use client";
+import React from "react";
+import {
+  Activity,
+  Bell,
+  Clock,
+  Server,
+  ArrowRight,
+  Check,
+  Globe,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 function App() {
   const router = useRouter();
@@ -21,10 +35,15 @@ function App() {
             Monitor Your Websites with Confidence
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Get instant alerts when your websites go down. Monitor uptime, performance, and ensure your business never misses a beat.
+            Get instant alerts when your websites go down. Monitor uptime,
+            performance, and ensure your business never misses a beat.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button size="lg" className="h-14 px-8 text-lg" onClick={() => router.push('/dashboard')}>
+            <Button
+              size="lg"
+              className="h-14 px-8 text-lg"
+              onClick={() => router.push("/dashboard")}
+            >
               Start Monitoring
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -84,7 +103,7 @@ function App() {
                 "1-minute checks",
                 "Email notifications",
                 "5 team members",
-                "24h data retention"
+                "24h data retention",
               ]}
             />
             <PricingCard
@@ -97,7 +116,7 @@ function App() {
                 "All notification channels",
                 "Unlimited team members",
                 "30-day data retention",
-                "API access"
+                "API access",
               ]}
             />
             <PricingCard
@@ -109,7 +128,7 @@ function App() {
                 "Priority support",
                 "Custom solutions",
                 "90-day data retention",
-                "SLA guarantee"
+                "SLA guarantee",
               ]}
             />
           </div>
@@ -131,25 +150,88 @@ function App() {
             <div>
               <h3 className="font-semibold mb-6">Product</h3>
               <ul className="space-y-3 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    API
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-6">Company</h3>
               <ul className="space-y-3 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Careers
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-6">Legal</h3>
               <ul className="space-y-3 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Terms
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Security
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -176,7 +258,9 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
         <CardTitle className="text-2xl">{title}</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <CardDescription className="text-base leading-relaxed">{description}</CardDescription>
+        <CardDescription className="text-base leading-relaxed">
+          {description}
+        </CardDescription>
       </CardContent>
     </Card>
   );
@@ -189,11 +273,20 @@ interface PricingCardProps {
   featured?: boolean;
 }
 
-function PricingCard({ title, price, features, featured = false }: PricingCardProps) {
+function PricingCard({
+  title,
+  price,
+  features,
+  featured = false,
+}: PricingCardProps) {
   return (
-    <Card className={`relative transition-all hover:shadow-xl p-6 ${
-      featured ? 'ring-2 ring-primary shadow-xl scale-105 bg-primary/5' : 'hover:scale-105'
-    }`}>
+    <Card
+      className={`relative transition-all hover:shadow-xl p-6 ${
+        featured
+          ? "ring-2 ring-primary shadow-xl scale-105 bg-primary/5"
+          : "hover:scale-105"
+      }`}
+    >
       {featured && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
           <Badge className="bg-primary text-primary-foreground px-4 py-1">
@@ -219,7 +312,10 @@ function PricingCard({ title, price, features, featured = false }: PricingCardPr
             </li>
           ))}
         </ul>
-        <Button className="w-full h-12 text-lg" variant={featured ? 'default' : 'outline'}>
+        <Button
+          className="w-full h-12 text-lg"
+          variant={featured ? "default" : "outline"}
+        >
           Get Started
         </Button>
       </CardContent>

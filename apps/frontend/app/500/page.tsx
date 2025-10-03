@@ -6,7 +6,9 @@ export default function Page500() {
       <div className="text-center">
         <h1 className="text-5xl font-bold mb-4">500</h1>
         <p className="text-muted-foreground mb-6">Internal Server Error</p>
-        <a href="/" className="underline">Return Home</a>
+        <a href="/" className="underline">
+          Return Home
+        </a>
       </div>
     </div>
   );
